@@ -3,6 +3,7 @@ import './App.css';
 import React from 'react';
 import CommandPalette from 'react-command-palette';
 import ManageTabGroupsModal from './components/manageTabGroupsModal/manageTabGroupsModal';
+import getCommands from './commands'
 
 class App extends React.Component {
   
@@ -15,12 +16,7 @@ class App extends React.Component {
     }
   }
 
-  componentDidMount() {
-    this.updateCommands()
-  }
-
   render() {
-  
     return (
       <div className="App" id='ryu'>
         <CommandPalette 
@@ -29,8 +25,6 @@ class App extends React.Component {
           showSpinnerOnSelect={false}
           closeOnSelect={true}
           resetInputOnOpen={true}
-          // onChange={(input, userQ)=>{console.log(input + ' ' + userQ)}}
-          // onSelect={(command)=>{console.log('select' + command)}}
         />
         { 
           this.state.manageTabGroupsModal ? 
@@ -42,77 +36,22 @@ class App extends React.Component {
     );
   }
 
+  componentDidMount() {    
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area == "sync" && "tabGroups" in changes) {
+          this.updateCommands()
+      }
+    });
+
+    this.updateCommands()
+  }
+
   updateCommands = () => {
-    const commands = []
-
-    //TODO: how do you handle when tabGroups > max quota per item?
-    commands.push({
-      name: 'saveTabs',
-      command: () => {
-        let name = window.prompt('Name this tab group')  
-        chrome.runtime.sendMessage(
-          {route: 'saveTabs', params: {name: name}}, 
-          (response) => {
-            console.log('repsonse ' + response)
-            console.log(chrome.runtime.lastError)
-            this.updateCommands()
-          }
-        )
-      }
-    })
-
-    commands.push({
-      name: 'Clear Storage',
-      command: () => {
-        chrome.storage.sync.clear(() => {console.log('sync storage cleared')})
-        this.updateCommands()
-      }
-    })
-
-
-    commands.push({
-      name: 'Get Storage',
-      command: () => {
-        chrome.storage.sync.getBytesInUse((bytes) => console.log('bytes' + bytes))  
-      }
-    })
-
-    commands.push({
-      name: 'Print Tab Groups',
-      command: () => {
-        chrome.runtime.sendMessage(
-          {route: 'printTabGroups'},
-          (response) => {
-            this.setState({
-              manageTabGroupsModal: true
-            })
-          }
-        )
-      }
-    })
-
-    chrome.storage.sync.get(['tabGroups'], (results) => {
-    
-      if(results.tabGroups) {
-        Object.keys(results.tabGroups).forEach((group) => {
-          commands.push({
-            name: 'Open Tabs: ' + group,
-            command: () => {
-              chrome.runtime.sendMessage(
-                {route: 'openTabs', params: {name: group}},
-                (response) => console.log('response ' + response)
-              )
-            }
-          })
-        })
-      }
-
+    getCommands().then((response) => {
       this.setState({
-        commands: commands
+        commands: response
       })
-
-    })  
-
+    })
   }
 
 }
