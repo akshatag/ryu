@@ -20,6 +20,7 @@ class App extends React.Component {
   }
 
   render() {
+  
     return (
       <div className="App" id='ryu'>
         <CommandPalette 
@@ -41,30 +42,40 @@ class App extends React.Component {
     );
   }
 
-  updateCommands = async () => {
-    const commands = [
-      {
-        name: 'saveTabs',
-        command: () => {
-          let name = window.prompt('Name this tab group')  
-          chrome.runtime.sendMessage(
-            {route: 'saveTabs', params: {name: name}}, 
-            (response) => {
-              console.log('repsonse ' + response)
-              this.updateCommands()
-            })
+  updateCommands = () => {
+    const commands = []
 
-        }
-      }
-    ]
-
+    //TODO: how do you handle when tabGroups > max quota per item?
     commands.push({
-      name: 'Clear Tab Groups',
+      name: 'saveTabs',
       command: () => {
-        chrome.storage.sync.set({tabGroups: null}, () => {})
+        let name = window.prompt('Name this tab group')  
+        chrome.runtime.sendMessage(
+          {route: 'saveTabs', params: {name: name}}, 
+          (response) => {
+            console.log('repsonse ' + response)
+            console.log(chrome.runtime.lastError)
+            this.updateCommands()
+          }
+        )
       }
     })
 
+    commands.push({
+      name: 'Clear Storage',
+      command: () => {
+        chrome.storage.sync.clear(() => {console.log('sync storage cleared')})
+        this.updateCommands()
+      }
+    })
+
+
+    commands.push({
+      name: 'Get Storage',
+      command: () => {
+        chrome.storage.sync.getBytesInUse((bytes) => console.log('bytes' + bytes))  
+      }
+    })
 
     commands.push({
       name: 'Print Tab Groups',
@@ -72,7 +83,6 @@ class App extends React.Component {
         chrome.runtime.sendMessage(
           {route: 'printTabGroups'},
           (response) => {
-            console.log(response)
             this.setState({
               manageTabGroupsModal: true
             })
@@ -81,25 +91,27 @@ class App extends React.Component {
       }
     })
 
-    await chrome.storage.sync.get(['tabGroups'], (results) => {
+    chrome.storage.sync.get(['tabGroups'], (results) => {
     
-      Object.keys(results.tabGroups).forEach((group) => {
-        commands.push({
-          name: 'Open Tabs: ' + group,
-          command: () => {
-            chrome.runtime.sendMessage(
-              {route: 'openTabs', params: {name: group}},
-              (response) => console.log('response ' + response)
-            )
-          }
+      if(results.tabGroups) {
+        Object.keys(results.tabGroups).forEach((group) => {
+          commands.push({
+            name: 'Open Tabs: ' + group,
+            command: () => {
+              chrome.runtime.sendMessage(
+                {route: 'openTabs', params: {name: group}},
+                (response) => console.log('response ' + response)
+              )
+            }
+          })
         })
+      }
+
+      this.setState({
+        commands: commands
       })
 
     })  
-
-    this.setState({
-      commands: commands
-    })
 
   }
 
