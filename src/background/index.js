@@ -1,9 +1,33 @@
-// If your extension doesn't need a background script, just leave this file empty
+/*global chrome*/
 
-messageInBackground();
-
-// This needs to be an export due to typescript implementation limitation of needing '--isolatedModules' tsconfig
-export function messageInBackground() {
-  console.log('I can run your javascript like any other code in your project');
-  console.log('just do not forget, I cannot render anything !');
+function saveTabs(request, sender, sendResponse) {
+  chrome.tabs.query({windowId: chrome.windows.WINDOW_ID_CURRENT}, (tabs) => {
+      chrome.storage.sync.set({tabset: tabs}, function() {
+        sendResponse({results: tabs})
+      })
+  })
 }
+
+function openTabs() {
+  chrome.storage.sync.get(['tabset'], (result) => {
+      console.log(result)
+      result.tabset.forEach(function(item, idx, arr){
+          chrome.tabs.create({url: item.url}, ()=>{})
+      })
+  })
+}
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      if(request.route == 'saveTabs'){
+        saveTabs(request, sender, sendResponse)
+      }
+
+      if(request.route == 'openTabs'){
+        openTabs()
+      }
+
+      return true;
+    }
+)
+
