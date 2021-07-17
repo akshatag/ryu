@@ -28,6 +28,18 @@ function saveTabs(request, sender, sendResponse) {
   })
 }
 
+function openTabs(request, sender, sendResponse) {
+  chrome.storage.sync.get(['tabGroups'], (result) => {
+      let tabGroup = result.tabGroups[request.params.name]
+
+      if(tabGroup){
+        tabGroup.forEach((item) => {
+          chrome.tabs.create({url: item}, ()=>{})
+        })
+      }
+  })
+}
+
 function clearStorage(request, sender, sendResponse) {
   chrome.storage.sync.clear(() => { 
     if(chrome.runtime.lastError) {
@@ -48,24 +60,6 @@ function getStorageUsed(request, sender, sendResponse) {
   })
 }
 
-function openTabs(request, sender, sendResponse) {
-  chrome.storage.sync.get(['tabGroups'], (result) => {
-      let tabGroup = result.tabGroups[request.params.name]
-
-      if(tabGroup){
-        tabGroup.forEach((item) => {
-          chrome.tabs.create({url: item}, ()=>{})
-        })
-      }
-  })
-}
-
-function printTabGroups(request, sender, sendResponse) {
-  chrome.storage.sync.get(['tabGroups'], (result) => {
-    sendResponse(result.tabGroups)
-  })
-}
-
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       if(request.route === 'saveTabs') {
@@ -74,10 +68,6 @@ chrome.runtime.onMessage.addListener(
 
       if(request.route === 'openTabs') {
         openTabs(request, sender, sendResponse)
-      }
-
-      if(request.route === 'printTabGroups') {
-        printTabGroups(request, sender, sendResponse)
       }
 
       if(request.route === 'clearStorage') {
