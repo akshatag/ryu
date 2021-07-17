@@ -8,48 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Button from '@material-ui/core/Button';
 import { withStyles } from "@material-ui/core/styles";
-
-
-const styles = theme => ({
-  paper: {
-    backgroundColor: '#303438',
-    border: 'none',
-    width: '480px',
-    position: 'absolute',
-    top: '30%',
-    left: '50%',
-    transform: 'translate(-50%,-50%)',
-    '&:focus': {
-      outline: 'none',
-    }           
-  },
-  list: {
-    color: 'white',
-    margin: '10px',
-  },
-  listItem: {
-    color: '#9da5b4',
-    border: '1px solid #181a1f',
-    borderTop: '0px none',
-    backgroundColor: '#2c313a',
-    padding: '14px 12px',
-    '&:hover': {
-        color: '#ffffff',
-        backgroundColor: '#3a3f4b'
-    }
-    // cursor: pointer;
-  },
-  listItemText: {
-    fontFamily: '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-    fontSize: '16px',
-  },
-  listItemButton: {
-    fontFamily: '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-    fontSize: '16px',
-    color: '#ff454573'
-  }
-});
-
+import styles from './styles'
 
 class ManageTGModal extends React.Component {
 
@@ -62,6 +21,11 @@ class ManageTGModal extends React.Component {
 
   componentDidMount() {
     this.updateTabGroups()
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === "sync" && "tabGroups" in changes) {
+          this.updateTabGroups()
+      }
+    });
   }
 
   render() {
@@ -75,6 +39,13 @@ class ManageTGModal extends React.Component {
           <div>
             <List className={classes.list}>
               {
+                this.state.tabGroups.length === 0 ?
+                <ListItem
+                  className={classes.listItem}>
+                  <ListItemText
+                    classes={{primary: classes.listItemText}}
+                    primary={'No tab groups yet!'}/>
+                </ListItem>:
                 this.state.tabGroups.map((item) => {
                   return (
                     <ListItem
@@ -84,7 +55,9 @@ class ManageTGModal extends React.Component {
                         classes={{primary: classes.listItemText}}
                         primary={item}/>
                       <ListItemSecondaryAction>
-                        <Button className={classes.listItemButton}>
+                        <Button 
+                          className={classes.listItemButton}
+                          onClick={() => this.deleteTabGroup(item)}>
                           Delete
                         </Button>
                       </ListItemSecondaryAction>
@@ -113,6 +86,18 @@ class ManageTGModal extends React.Component {
     })
   }
 
+
+  deleteTabGroup = (group) => { 
+    chrome.storage.sync.get(['tabGroups'], (results) => {      
+      if(results.tabGroups){
+        if(results.tabGroups[group]){
+          let updatedTabGroups = results.tabGroups
+          delete updatedTabGroups[group]
+          chrome.storage.sync.set({tabGroups: updatedTabGroups}, ()=>{})
+        }
+      }
+    })
+  }
 
 }
 

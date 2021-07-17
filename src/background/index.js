@@ -60,6 +60,28 @@ function getStorageUsed(request, sender, sendResponse) {
   })
 }
 
+async function getOpenTabs(request, sender, sendResponse) {
+  chrome.tabs.query({}, (results) => {
+    let tabsData = results.map((item) => {return {id: item.id, window: item.windowId, title: item.title}})
+    sendResponse({results: tabsData})
+  })
+  // sendResponse({results: 'success'})
+}
+
+
+function goToTab(request, sender, sendResponse) {
+  chrome.tabs.update(request.params.id, {selected:true}, () => {
+    chrome.windows.update(request.params.window, {focused: true}, () => {
+      if(chrome.runtime.lastError) {
+        sendResponse({err: chrome.runtime.lastError})
+      } else {
+        sendResponse('Went to tab')
+      }
+    })
+  }) 
+}
+
+
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       if(request.route === 'saveTabs') {
@@ -78,7 +100,14 @@ chrome.runtime.onMessage.addListener(
         getStorageUsed(request, sender, sendResponse)
       }
 
+      if(request.route === 'getOpenTabs') {
+        getOpenTabs(request, sender, sendResponse)
+      }
+
+      if(request.route === 'goToTab') {
+        goToTab(request, sender, sendResponse)
+      }
+
       return true;
     }
 )
-

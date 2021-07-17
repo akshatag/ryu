@@ -17,19 +17,44 @@ class App extends React.Component {
   }
 
   render() {
+
+    const theme = {
+      modal: "ryu-modal",
+      overlay: "ryu-overlay",
+      header: "ryu-header",
+      container: "ryu-container",
+      content: "ryu-content",
+      containerOpen: "ryu-containerOpen",
+      input: "ryu-input",
+      inputOpen: "ryu-inputOpen",
+      inputFocused: "ryu-inputFocused",
+      spinner: "ryu-spinner",
+      suggestionsContainer: "ryu-suggestionsContainer",
+      suggestionsContainerOpen: "ryu-suggestionsContainerOpen",
+      suggestionsList: "ryu-suggestionsList",
+      suggestion: "ryu-suggestion",
+      suggestionFirst: "ryu-suggestionFirst",
+      suggestionHighlighted: "ryu-suggestionHighlighted",
+      trigger: "ryu-trigger"
+    }
+
     return (
-      <div className="App" id='ryu'>
+      <div className="App" id='ryu-app'>
         <CommandPalette 
+          theme={theme}
           commands={this.state.commands}
           hotKeys='ctrl+space'
           showSpinnerOnSelect={false}
           closeOnSelect={true}
           resetInputOnOpen={true}
+          onRequestClose={this.updateCommands}
+          trigger={null}
         />
         { 
           this.state.manageTabGroupsModal ? 
           <ManageTGModal
-            onClose={() => this.setState({manageTabGroupsModal: false})}/> :
+            onClose={() => this.setState({manageTabGroupsModal: false})}
+            deleteTabGroup={(group) => console.log('deleting' + group)}/> :
           null
         }
       </div>
@@ -47,6 +72,7 @@ class App extends React.Component {
   }
 
   updateCommands = () => {
+    console.log('updating commands')
     this.getCommands().then((response) => {
       this.setState({
         commands: response
@@ -93,7 +119,34 @@ class App extends React.Component {
         })
       }
     })
-  
+
+    console.log('sending request for open tabs')
+    /* Go to */
+    chrome.runtime.sendMessage({route: 'getOpenTabs'}, (response) => {
+      console.log('returned with results')
+      
+      if(response.err) {
+        alert(response.err.message)
+      } else {
+        console.log(response.results)
+
+        response.results.forEach((tab) => {
+          commands.push({
+            name: 'Go To: ' + tab.title,
+            command: () => {
+              chrome.runtime.sendMessage({route: 'goToTab', params: {id: tab.id, window: tab.window}}, (response) => {
+                if(response.err) {
+                  alert(response.err.message)
+                } else {
+                  console.log(response)
+                }
+              })
+            }
+          })
+        })
+      }
+    })
+
     /* Clear Storage */
     commands.push({
       name: 'Clear Storage',
