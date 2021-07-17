@@ -65,9 +65,7 @@ async function getOpenTabs(request, sender, sendResponse) {
     let tabsData = results.map((item) => {return {id: item.id, window: item.windowId, title: item.title}})
     sendResponse({results: tabsData})
   })
-  // sendResponse({results: 'success'})
 }
-
 
 function goToTab(request, sender, sendResponse) {
   chrome.tabs.update(request.params.id, {selected:true}, () => {
@@ -80,7 +78,6 @@ function goToTab(request, sender, sendResponse) {
     })
   }) 
 }
-
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
