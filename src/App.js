@@ -43,7 +43,7 @@ class App extends React.Component {
         <CommandPalette 
           theme={theme}
           commands={this.state.commands}
-          hotKeys='ctrl+space'
+          hotKeys='option+command'
           showSpinnerOnSelect={false}
           closeOnSelect={true}
           resetInputOnOpen={true}
@@ -63,10 +63,22 @@ class App extends React.Component {
 
   componentDidMount() {    
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === "sync" && "tabGroups" in changes) {
+      if(area === "sync" && "tabGroups" in changes) {
           this.updateCommands()
       }
     });
+
+    window.addEventListener('keydown', (event) => {
+      if(event.altKey && event.key == 'ArrowRight') {
+        chrome.runtime.sendMessage({route: 'toggleTabs'}, (response) => {
+          if(response.err) {
+            alert(response.err.message)
+          } else {
+            console.log(response.message)
+          }
+        })
+      }
+    })
 
     this.updateCommands()
   }
@@ -85,11 +97,11 @@ class App extends React.Component {
   
     /* Save Tabs */
     commands.push({
-      name: 'Save Tabs',
+      name: 'Save Tab Group',
       command: () => {
         let name = window.prompt('Name this tab group')  
         chrome.runtime.sendMessage(
-          {route: 'saveTabs', params: {name: name}}, 
+          {route: 'saveTabGroup', params: {name: name}}, 
           (response) => {
             if(response.err) {
               alert(response.err.message)
@@ -104,10 +116,10 @@ class App extends React.Component {
       if(results.tabGroups) {
         Object.keys(results.tabGroups).forEach((groupName) => {
           commands.push({
-            name: 'Open Tabs: ' + groupName,
+            name: 'Open Tab Group: ' + groupName,
             command: () => {
               chrome.runtime.sendMessage(
-                {route: 'openTabs', params:{name: groupName}},
+                {route: 'openTabGroup', params:{name: groupName}},
                 (response) => {
                   if(response.err) {
                     alert(response.err.message)
@@ -120,16 +132,11 @@ class App extends React.Component {
       }
     })
 
-    console.log('sending request for open tabs')
     /* Go to */
-    chrome.runtime.sendMessage({route: 'getOpenTabs'}, (response) => {
-      console.log('returned with results')
-      
+    chrome.runtime.sendMessage({route: 'getOpenTabs'}, (response) => {      
       if(response.err) {
         alert(response.err.message)
       } else {
-        console.log(response.results)
-
         response.results.forEach((tab) => {
           commands.push({
             name: 'Go To: ' + tab.title,
@@ -137,8 +144,6 @@ class App extends React.Component {
               chrome.runtime.sendMessage({route: 'goToTab', params: {id: tab.id, window: tab.window}}, (response) => {
                 if(response.err) {
                   alert(response.err.message)
-                } else {
-                  console.log(response)
                 }
               })
             }
@@ -184,6 +189,34 @@ class App extends React.Component {
           manageTabGroupsModal: true
         })
       })
+    })
+
+    /* Toggle Tabs */
+    commands.push({
+      name: 'Toggle Tabs',
+      command: () => {
+        chrome.runtime.sendMessage({route: 'toggleTabs'}, (response) => {
+          if(response.err) {
+            alert(response.err.message)
+          } else {
+            console.log(response.message)
+          }
+        })
+      }
+    })
+
+    /* Print Toggle Tabs Data */
+    commands.push({
+      name: 'Debug: Print Toggle Tabs Data',
+      command: () => {
+        chrome.runtime.sendMessage({route: 'getToggleTabsData'}, (response) => {
+          if(response.err) {
+            alert(response.err.message)
+          } else {
+            console.log(response)
+          }
+        })
+      }
     })
   
   

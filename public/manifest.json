@@ -4,12 +4,12 @@
   "short_name": "Ryu",
   "name": "Ryu",
   "description": "super powers for chrome",
-  "browser_action": {
+  "action": {
     "default_title": "CRE",
     "default_popup": "popup.html"
   },
   "background": {
-    "scripts": ["background.bundle.js"]
+    "service_worker": "background.bundle.js"
   },
   "content_scripts": [
     {
@@ -25,6 +25,6 @@
   "options_page": "options.html",
   "permissions": ["activeTab", "storage", "tabs", "sessions"],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+    "extension_pages": "script-src 'self'; object-src 'self'"
   }
 }
