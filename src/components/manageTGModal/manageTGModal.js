@@ -88,15 +88,19 @@ class ManageTGModal extends React.Component {
 
 
   deleteTabGroup = (group) => { 
-    chrome.storage.sync.get(['tabGroups'], (results) => {      
-      if(results.tabGroups){
-        if(results.tabGroups[group]){
-          let updatedTabGroups = results.tabGroups
-          delete updatedTabGroups[group]
-          chrome.storage.sync.set({tabGroups: updatedTabGroups}, ()=>{})
+    let confirm = window.confirm('Are you sure you want to delete ' + group + '?') 
+
+    if(confirm) {
+      chrome.storage.sync.get(['tabGroups'], (results) => {      
+        if(results.tabGroups){
+          if(results.tabGroups[group]){
+            let updatedTabGroups = results.tabGroups
+            delete updatedTabGroups[group]
+            chrome.storage.sync.set({tabGroups: updatedTabGroups}, ()=>{})
+          }
         }
-      }
-    })
+      })
+    }
   }
 
 }
