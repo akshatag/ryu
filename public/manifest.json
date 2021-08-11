@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "version": "0.0.1",
-  "short_name": "Ryu",
-  "name": "Ryu",
+  "version": "0.0.2",
+  "short_name": "Kyn",
+  "name": "Kyn",
   "description": "super powers for chrome",
   "action": {
     "default_title": "CRE",
@@ -13,8 +13,11 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["contentScript.bundle.js"]
+      "matches": ["<all_urls>", "chrome://*/*"],
+      "js": ["contentScript.bundle.js"],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
     }
   ],
   "icons": {
@@ -23,7 +26,7 @@
     "128": "img/icon-128.png"
   },
   "options_page": "options.html",
-  "permissions": ["activeTab", "storage", "tabs", "sessions"],
+  "permissions": ["activeTab", "storage", "tabs", "sessions", "bookmarks"],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   }

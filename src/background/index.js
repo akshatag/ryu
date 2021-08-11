@@ -1,4 +1,5 @@
 /*global chrome*/
+import { FormatAlignJustifyOutlined } from '@material-ui/icons';
 import 'chrome-storage-promise';
 
 // window.addEventListener('keydown', (event) => {
@@ -29,6 +30,14 @@ chrome.runtime.onMessage.addListener(
 
     if(request.route === 'getOpenTabs') {
       getOpenTabs(request, sender, sendResponse)
+    }
+
+    if(request.route === 'getBookmarks') {
+      getBookmarks(request, sender, sendResponse)
+    }
+
+    if(request.route === 'openBookmark') {
+      openBookmark(request, sender, sendResponse)
     }
 
     if(request.route === 'goToTab') {
@@ -146,6 +155,47 @@ function toggleTabs(request, sender, sendResponse) {
     }
   })
 }
+
+async function getBookmarks(request, sender, sendResponse) {
+  let nodes = await chrome.bookmarks.getTree()
+  let bookmarks = dumpNodes(nodes[0].children[0], null)
+  sendResponse({bookmarks: bookmarks})
+}
+
+function dumpNodes(node, prefix) {
+  let bookmarks = []
+  let nextPrefix;
+  
+  if(prefix && prefix != 'Bookmarks Bar') {
+    nextPrefix = prefix + ' > ';
+  } else {
+    nextPrefix = '';
+  }
+
+  if(node.url) {
+    if(prefix && prefix != 'Bookmarks Bar') {
+      node.title = nextPrefix + node.title;
+    } 
+    bookmarks.push(node)
+  } else {
+    for(let i = 0; i < node.children.length; i++) {
+      bookmarks.push(...dumpNodes(node.children[i], nextPrefix + node.title))
+    }
+  }
+
+  return bookmarks
+}
+
+function openBookmark(request, sender, sendResponse) {
+  chrome.tabs.create({url: request.params.bookmark.url}, ()=>{
+    if(chrome.runtime.lastError) {
+      sendResponse({err: chrome.runtime.lastError})
+    } else {
+      sendResponse({message: 'openBookmark: success'})
+    }
+  })
+}
+
 
 async function getToggleTabsData(request, sender, sendResponse) {
   let results = await chrome.storage.promise.local.get(['toggleTabs'])

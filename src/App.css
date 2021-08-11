@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300&display=swap');
 
-.ryu-app {
+.kyn-app {
   text-align: center;
   font-family: Roboto Mono,-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 
-.ryu-trigger {
+.kyn-trigger {
   display: none;
 }
 
-.ryu-modal {
+.kyn-modal {
   width: 605px;
   position: absolute;
   top: 80px;
@@ -27,7 +27,7 @@
   transform: translate(-50%, 0px);
 }
 
-.ryu-overlay {
+.kyn-overlay {
   position: fixed;
   top: 0px;
   left: 0px;
@@ -37,11 +37,11 @@
   z-index: 9999;
 }
 
-.ryu-header {
+.kyn-header {
   color: #d7dae0;
 }
 
-.ryu-content {
+.kyn-content {
   box-shadow: rgb(0, 0, 0) 0px 2px 4px 0px;
   position: absolute;
   top: 80px;
@@ -60,15 +60,15 @@
   min-width: 600px;
 }
 
-.ryu-container {
+.kyn-container {
   font-family: Roboto Mono,-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   font-weight: lighter;
   font-size: 12px;
 }
 
-.ryu-containerOpen {}
+.kyn-containerOpen {}
 
-.ryu-input {
+.kyn-input {
   font-family: Roboto Mono,-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   font-size: 14px;
   border-radius: 4px;
@@ -81,16 +81,16 @@
   caret-color: #568af2;
 }
 
-.ryu-inputOpen {}
+.kyn-inputOpen {}
 
-.ryu-inputFocused {
+.kyn-inputFocused {
   border: 2px solid #568af2;
   background-color: #1b1d23;
 }
 
-.ryu-suggestionsContainer {}
+.kyn-suggestionsContainer {}
 
-.ryu-suggestionsContainerOpen {
+.kyn-suggestionsContainerOpen {
   overflow: hidden;
   border-top: 1px solid #111;
   border-bottom: 1px solid #111;
@@ -98,14 +98,14 @@
   margin-top: 10px
 }
 
-.ryu-suggestionsList {
+.kyn-suggestionsList {
   list-style: none;
   padding: 0;
   margin-bottom: 0;
   margin-top: 0
 }
 
-.ryu-suggestion {
+.kyn-suggestion {
   color: #9da5b4;
   border: 1px solid #181a1f;
   border-top: 0px none;
@@ -114,20 +114,20 @@
   cursor: pointer;
 }
 
-.ryu-suggestion b {
+.kyn-suggestion b {
   color: #598cef;
   font-weight: bold;
 }
 
-.ryu-suggestionFirst {
+.kyn-suggestionFirst {
 }
 
-.ryu-suggestionHighlighted {
+.kyn-suggestionHighlighted {
   color: #ffffff;
   background-color: #3a3f4b
 }
 
-.ryu-spinner {
+.kyn-spinner {
   border-top: 0.4em solid rgba(255, 255, 255, 0.2);
   border-right: 0.4em solid rgba(255, 255, 255, 0.2);
   border-bottom: 0.4em solid rgba(255, 255, 255, 0.2);

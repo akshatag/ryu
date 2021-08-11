@@ -1,9 +1,10 @@
 /*global chrome*/
-import './App.css';
 import 'chrome-storage-promise';
 import React from 'react';
 import CommandPalette from 'react-command-palette';
 import ManageTGModal from './components/manageTGModal/manageTGModal';
+import HelpModal from './components/helpModal/helpModal';
+import './App.css'
 
 class App extends React.Component {
   
@@ -12,37 +13,40 @@ class App extends React.Component {
     
     this.state = {
       commands: [],
-      manageTabGroupsModal: false
+      manageTabGroupsModal: false,
+      helpModal: false
     }
   }
 
   render() {
 
     const theme = {
-      modal: "ryu-modal",
-      overlay: "ryu-overlay",
-      header: "ryu-header",
-      container: "ryu-container",
-      content: "ryu-content",
-      containerOpen: "ryu-containerOpen",
-      input: "ryu-input",
-      inputOpen: "ryu-inputOpen",
-      inputFocused: "ryu-inputFocused",
-      spinner: "ryu-spinner",
-      suggestionsContainer: "ryu-suggestionsContainer",
-      suggestionsContainerOpen: "ryu-suggestionsContainerOpen",
-      suggestionsList: "ryu-suggestionsList",
-      suggestion: "ryu-suggestion",
-      suggestionFirst: "ryu-suggestionFirst",
-      suggestionHighlighted: "ryu-suggestionHighlighted",
-      trigger: "ryu-trigger"
+      modal: "kyn-modal",
+      overlay: "kyn-overlay",
+      header: "kyn-header",
+      container: "kyn-container",
+      content: "kyn-content",
+      containerOpen: "kyn-containerOpen",
+      input: "kyn-input",
+      inputOpen: "kyn-inputOpen",
+      inputFocused: "kyn-inputFocused",
+      spinner: "kyn-spinner",
+      suggestionsContainer: "kyn-suggestionsContainer",
+      suggestionsContainerOpen: "kyn-suggestionsContainerOpen",
+      suggestionsList: "kyn-suggestionsList",
+      suggestion: "kyn-suggestion",
+      suggestionFirst: "kyn-suggestionFirst",
+      suggestionHighlighted: "kyn-suggestionHighlighted",
+      trigger: "kyn-trigger"
     }
 
+
     return (
-      <div className="App" id='ryu-app'>
+      <div className="App" id='kyn-app'>
         <CommandPalette 
           theme={theme}
           commands={this.state.commands}
+          placeholder='Type a command or "Help" for more information'
           hotKeys='option+command'
           showSpinnerOnSelect={false}
           closeOnSelect={true}
@@ -55,6 +59,12 @@ class App extends React.Component {
           <ManageTGModal
             onClose={() => this.setState({manageTabGroupsModal: false})}
             deleteTabGroup={(group) => console.log('deleting' + group)}/> :
+          null
+        }
+        {
+          this.state.helpModal ?
+          <HelpModal
+            onClose={() => this.setState({helpModal: false})}/> : 
           null
         }
       </div>
@@ -132,6 +142,25 @@ class App extends React.Component {
       }
     })
 
+    /* Bookmarks */
+    chrome.runtime.sendMessage({route: 'getBookmarks'}, (response)=> {
+      response.bookmarks.forEach((bookmark) => {
+        commands.push({
+          name: 'Open Bookmark: ' + bookmark.title,
+          command: () => {
+            chrome.runtime.sendMessage(
+              {route: 'openBookmark', params:{bookmark: bookmark}},
+              (response) => {
+                if(response.err) {
+                  alert(response.err.message)
+                }
+              }
+            )
+          }
+        })
+      })
+    }) 
+
     /* Go to */
     chrome.runtime.sendMessage({route: 'getOpenTabs'}, (response) => {      
       if(response.err) {
@@ -191,6 +220,16 @@ class App extends React.Component {
       })
     })
 
+    /* Help */
+    commands.push({
+      name: 'Help',
+      command: (() => {
+        this.setState({
+          helpModal: true
+        })
+      })
+    })
+
     /* Toggle Tabs */
     commands.push({
       name: 'Toggle Tabs',
@@ -218,6 +257,8 @@ class App extends React.Component {
         })
       }
     })
+
+
   
   
     return commands;
