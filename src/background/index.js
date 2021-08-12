@@ -1,14 +1,17 @@
 /*global chrome*/
-import { FormatAlignJustifyOutlined } from '@material-ui/icons';
 import 'chrome-storage-promise';
 
-// window.addEventListener('keydown', (event) => {
-//   if(event.altKey && event.key == 'ArrowRight') {
-//     toggleTabs(null, null, (response)=>{})
-//   }
-// })
+
+chrome.commands.onCommand.addListener((command) => {
+  if(command === 'activate-kyn') {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {route: "activate-kyn"}, () => {})
+    });
+  }
+});
 
 chrome.tabs.onActivated.addListener(updateToggleTabsData)
+
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {

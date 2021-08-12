@@ -25,6 +25,14 @@
     "48": "img/icon-48.png",
     "128": "img/icon-128.png"
   },
+  "commands": {
+    "activate-kyn": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+P"
+      },
+      "description": "Activate Kyn on current page"
+    }
+  },
   "options_page": "options.html",
   "permissions": ["activeTab", "storage", "tabs", "sessions", "bookmarks"],
   "content_security_policy": {

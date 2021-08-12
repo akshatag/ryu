@@ -18,6 +18,7 @@ class App extends React.Component {
     }
   }
 
+
   render() {
 
     const theme = {
@@ -47,12 +48,12 @@ class App extends React.Component {
           theme={theme}
           commands={this.state.commands}
           placeholder='Type a command or "Help" for more information'
-          hotKeys='option+command'
+          // hotKeys='option+command'
           showSpinnerOnSelect={false}
           closeOnSelect={true}
-          resetInputOnOpen={true}
           onRequestClose={this.updateCommands}
-          trigger={null}
+          resetInputOnOpen={true}
+          trigger={<button id={'kyn-trigger'} style={{display: 'none'}}></button>}
         />
         { 
           this.state.manageTabGroupsModal ? 
@@ -78,8 +79,14 @@ class App extends React.Component {
       }
     });
 
-    window.addEventListener('keydown', (event) => {
-      if(event.altKey && event.key == 'ArrowRight') {
+    chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
+        if(request.route === 'activate-kyn'){
+          document.getElementById("kyn-trigger").click()
+        }
+    }.bind(this));
+
+    document.addEventListener('keydown', (event) => {
+      if(event.metaKey && event.shiftKey && event.key == 'ArrowRight') {
         chrome.runtime.sendMessage({route: 'toggleTabs'}, (response) => {
           if(response.err) {
             alert(response.err.message)
@@ -91,9 +98,10 @@ class App extends React.Component {
     })
 
     this.updateCommands()
+
   }
 
-  updateCommands = () => {
+  updateCommands = async () => {
     console.log('updating commands')
     this.getCommands().then((response) => {
       this.setState({
